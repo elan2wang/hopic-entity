@@ -40,7 +40,7 @@ class Session {
 
 public class EntityStatistic {
 	static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-	
+
 	public static void main(String args[]) {
 		HashMap<Integer, List<Integer>> map = entity_doc_map("News/entity/entity_all.txt");
 		HashMap<Integer, Integer> dateMap = date_doc_map("News/todolist/Guardian_Edward_Snowden.dat");
@@ -77,20 +77,9 @@ public class EntityStatistic {
 				}
 				entityDates.add(dates);
 			}
-			
-			List<Session> sessions = new ArrayList<Session>();
-			for (int i=0; i<250; i++) {
-				List<Integer> members = new ArrayList<Integer>();
-				for (int j=1; j<=entityDates.size(); j++) {
-					List<Integer> dates = entityDates.get(j-1);
-					if (dates.contains(i)) members.add(j);
-				}
-				if (members.size() > 1) {
-					Session session = new Session(sessions.size(), i, 1, members);
-					sessions.add(session);
-				}
-			}
-			
+			////////////////////
+			List<Session> sessions = generateSession(entityDates, 7);
+			//List<Session> sessions = generateSessionByIndividule(entityDates, 7);
 			// output json
 			JSONObject json = new JSONObject();
 			json.put("panels", 220);
@@ -119,7 +108,42 @@ public class EntityStatistic {
 		}
 		
 	}
-	
+
+	private static boolean dateInDuration(List<Integer> dates, int session, int duration) {
+		for(Integer date : dates) {
+			if(date >= session * duration && date < (session + 1) * duration) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static List<Session> generateSession(List<List<Integer>> entityDates, int duration) {
+		List<Session> sessions = new ArrayList<Session>();
+		for(int session=0; session<250/duration; session++) {
+			List<Integer> members = new ArrayList<Integer>();
+			for(int i=1; i<=entityDates.size(); i++) {
+				// date from : (session ~ session + 1) * duration
+				List<Integer> dates = entityDates.get(i-1);
+				if(dateInDuration(dates, session, duration)) members.add(i);
+			}
+			if(members.size() > 1) {
+				Session s = new Session(sessions.size(), session * duration, duration, members);
+				sessions.add(s);
+			}
+		}
+
+		return sessions;
+	}
+
+	private static List<Session> generateSessionByIndividule(List<List<Integer>> entityDates, int duration) {
+		List<Session> sessions = new ArrayList<Session>();
+		
+
+		return sessions;
+
+	}
+
 	/**
 	 * 实体编号 ～ 文档列表
 	 *
